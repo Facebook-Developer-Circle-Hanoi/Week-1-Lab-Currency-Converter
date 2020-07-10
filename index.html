@@ -3,51 +3,71 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Currency Converter</title>
-	<link rel="stylesheet" href="">
+	<title>Number Guessing Game in HTML</title>
+	<style>
+		.correct {
+			background: #8bc34a !important;
+			color: #fff
+		}
+		.wrong {
+			background: #f44336;
+			color: #fff
+		}
+	</style>
 </head>
 <body>
-	<h1>Currency Converter</h1>
-	<p>Select input currency</p>
-	<input type="radio" name="currency" value="USD" checked=""> USD<br>
-	<input type="radio" name="currency" value="EUR"> EUR<br>
-	<input type="text" id="number" value="1"><br>
-	<button id="submit">Quấtttt</button><br>
-	<span id="result"></span>
+	<span id="message">Enter the numbers you predict</span> <br>
+	<input type="number" id="number">
+	<button id="submit">Guess</button>
 	<script>
-		var submit = document.getElementById('submit');
-		submit.addEventListener('click',()=>{
-			convert();
-		})
-		var convert = () =>{
-			var currency = document.getElementsByName('currency'),
-			result = document.getElementById('result'),
+		var submit = document.getElementById('submit'),
+		answer = Math.floor(Math.random() * 100);
+		console.log(answer);
+
+		// Initialize local Storage variables
+		localStorage.setItem('count', '0');
+		count = parseInt(localStorage.getItem('count'));
+
+		// Event when clicking on the Guess button
+		submit.addEventListener('click', ()=>{
+			var message = document.getElementById('message'),
 			number = document.getElementById('number').value;
-			for (var i = 0, length = currency.length; i < length; i++) {
-				if (currency[i].checked) {
-					input = currency[i].value;
-					break;
-				}
+
+			// Increase the value local Storage variables
+			if (localStorage.getItem('count') != null) {
+				localStorage.setItem('count', count++);
 			}
-			fetch('https://free.currconv.com/api/v7/convert?q='+input+'_VND&compact=y&apiKey=do-not-use-this-key',{
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json'
+
+			// Check user input value
+			var patt = /^[0-9]+$/ig,
+  			result = number.match(patt);
+  			if (result != null) {
+  				result = parseInt(result);
+
+  				// Correct answer
+  				if (result == answer) {
+  					message.innerHTML = "Congratulations!! "+ result +" was the correct answer! It took you "+ count +" tries to guess the answer";
+  					localStorage.removeItem('count');
+  					message.classList.add('correct');
+  					return;
+  				// Wrong answer
+  				} else if (result < answer) {
+  					message.innerHTML = "Sorry your guess is too low, you have "+ count +" guesses left";
+  					message.classList.add('wrong');
+  				} else if (result > answer) {
+  					message.innerHTML = "Sorry your guess is too high, you have "+ count +" guesses left";
+  					message.classList.add('wrong');
+  				}
+
+  				// when user input answer more than 10 turn
+  				if (count >= 10) {
+					message.innerHTML = "Sorry, you lose";
+					localStorage.removeItem('count');
 				}
-			})
-			.then(res => res.json())
-			.then((res) => {
-				if (input == 'USD') {
-					a = res.USD_VND.val;
-				} else {
-					a = res.EUR_VND.val;
-				}
-				result.innerHTML = 'Result: ' + parseInt(number)*a;
-			})
-			.catch((error) => {
-				console.log('error:' + error);
-			})
-		}
+  			} else {
+  				message.innerHTML = "Invalid number";
+  			}
+		})
 	</script>
 </body>
 </html>
